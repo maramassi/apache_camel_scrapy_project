@@ -6,6 +6,6 @@ https://issues.apache.org/jira/browse/CAMEL-10597
 
 The used tool is Scrapy 1.6
 
-Through the cmd run the following commande to runt the spider, crawl the requested page and insert the parsed data in a csv file
+Through the cmd, run the following command to run the spider, crawl the requested page and insert the parsed data in a csv file
 
 scrapy crawl ApacheCamelSpider -o camel.csv -t csv
