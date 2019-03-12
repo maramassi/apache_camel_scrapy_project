@@ -29,16 +29,12 @@ class ApachecamelspiderSpider(scrapy.Spider):
 		   
 		#Extract the labels of the detail section
         #details_lables=response.css('ul.property-list.two-cols strong.name::text').extract()
-        details_lables=response.css('#issuedetails > li > div > strong::text').extract()
-        details_lables= clearStringList(details_lables)
-		 
-		#Extract the values of the details section. TODO
+        details_lables=clearStringList(response.css('#issuedetails > li > div > strong::text').extract())
+         
+		#TODO: Extract correct the values of the details section. TODO
         details_values=response.css('#issuedetails span.value > span::text').extract() 
-        valueList=[]
-        for value in details_values:
-         new=value.replace('\n', '').replace('\r', '').replace(' ','')
-         valueList.append(new)
-
+        valueList=clearStringList(details_values)
+        
         #Extract the Labels of the people section
         people_labels=response.css('ul#peopledetails li.people-details dt::text').extract()
         people_labels=clearStringList(people_labels)
@@ -49,19 +45,16 @@ class ApachecamelspiderSpider(scrapy.Spider):
         people_values=clearStringList(people_values)
         
         #dates section
-        dates_labels=response.css('div#datesmodule.module > div.mod-content ul li dl.dates dt::text').extract()
+        dates_labels=clearStringList(response.css('div#datesmodule.module > div.mod-content ul li dl.dates dt::text').extract())
         dates_values=response.css('dd.date time.livestamp::text').extract()
         
-        #TODO: get the epoch format of the date
+        #TODO: set the epoch format of the date in a separate column
         epochDates =[]
         for dateValue in dates_values:
           epochDates.append(epochDate(dateValue))	   
         print("formatted dates")         
         print(epochDates)
-        newDateLabelList = []
-        for date in dates_labels:
-         newDateLabel=date.replace(':', '')
-         newDateLabelList.append(newDateLabel)
+        
          
         #extract comments section
         comments_values=response.xpath('//*[@id="comment-15748543"]/div[1]/div[2]/p/text()').extract()
@@ -73,7 +66,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
 
 		#building the dictionnaries
         descrDict={'description' : descriptionValues}
-        datesDict= dict(zip(newDateLabelList, epochDates))
+        datesDict= dict(zip(dates_labels, epochDates))
         peoplesDict= dict(zip(people_labels, people_values))
         dicDetailsValue = dict(zip(details_lables, valueList))
         dicDetailsValue.update(datesDict)
