@@ -15,18 +15,28 @@ class ApachecamelspiderSpider(scrapy.Spider):
     def parse(self, response):	
 
         #function used to get the epoch date from the datetime
-        def epochDate(date_time_str):
-           date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M').timestamp()
-           return date_time_obj
+        def epochDate(date_time_list):
+           date_epoch_list=[]
+           for date_time_str in date_time_list:
+             date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M').timestamp()
+             date_epoch_list.append(date_time_obj)
+           return date_epoch_list
 
-        #function used to get rid of the spaces, carriage returns, etc.. of the strings
+		#function used to get the epoch date lables    
+        def epochDateLabels(dateLabelsList):
+           newList=[]
+           for label in dateLabelsList:
+            newList.append(label + "_Epoch")
+           return newList
+
+		#function used to get rid of the spaces, carriage returns, etc.. of the strings
         def clearStringList(strListToClear):
            newClearedList=[]
            for details in strListToClear:
             newDetail=details.replace(':', '').replace('\n', '').replace('\r', '').replace(' ','')
             newClearedList.append(newDetail)
            return newClearedList
-		   
+		  
 		#Extract the labels of the detail section
         #details_lables=response.css('ul.property-list.two-cols strong.name::text').extract()
         details_lables=clearStringList(response.css('#issuedetails > li > div > strong::text').extract())
@@ -48,13 +58,8 @@ class ApachecamelspiderSpider(scrapy.Spider):
         dates_labels=clearStringList(response.css('div#datesmodule.module > div.mod-content ul li dl.dates dt::text').extract())
         dates_values=response.css('dd.date time.livestamp::text').extract()
         
-        #TODO: set the epoch format of the date in a separate column
-        epochDates =[]
-        for dateValue in dates_values:
-          epochDates.append(epochDate(dateValue))	   
-        print("formatted dates")         
-        print(epochDates)
-        
+        #get the epoch format of the date
+        epochDates = epochDate(dates_values)
          
         #extract comments section
         comments_values=response.xpath('//*[@id="comment-15748543"]/div[1]/div[2]/p/text()').extract()
@@ -66,10 +71,12 @@ class ApachecamelspiderSpider(scrapy.Spider):
 
 		#building the dictionnaries
         descrDict={'description' : descriptionValues}
-        datesDict= dict(zip(dates_labels, epochDates))
+        datesDict= dict(zip(dates_labels, dates_values))
+        datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
         peoplesDict= dict(zip(people_labels, people_values))
         dicDetailsValue = dict(zip(details_lables, valueList))
         dicDetailsValue.update(datesDict)
+        dicDetailsValue.update(datesEpochDict)
         dicDetailsValue.update(peoplesDict)
         dicDetailsValue.update(commentsDict)
         dicDetailsValue.update(descrDict)
