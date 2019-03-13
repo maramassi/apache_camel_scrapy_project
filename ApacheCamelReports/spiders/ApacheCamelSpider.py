@@ -44,11 +44,13 @@ class ApachecamelspiderSpider(scrapy.Spider):
            return newClearedList
 		  
 		#Extract the labels of the detail section
-        details_lables=clearStringList(response.css('#issuedetails > li > div > strong::text').extract())
+        details_lables=clearStringList(response.css('#issuedetails > li > div > strong::text, ul.property-list > li > div > strong::text').extract())
          
 		#TODO: Extract correct the values of the details section
-        details_values=response.css('#issuedetails span.value > span::text').extract() 
+        details_values=response.css('#issuedetails span.value:not(img)::text, span.value span a::text, span.value span::text, ul.property-list > li > div > div> div > span::text, ul.property-list > li > div > div::text').extract() 
+        print(details_values)
         valueList=clearStringList(details_values)
+        print(valueList)
         
         #parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
         peopleDictNew = {'Assignee' : str(response.css('span#assignee-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
@@ -60,7 +62,6 @@ class ApachecamelspiderSpider(scrapy.Spider):
         #dates section. Get the list of all the fields in the date section as well as their values
         dates_labels=clearStringList(response.css('div#datesmodule.module > div.mod-content ul li dl.dates dt::text').extract())
         dates_values=response.css('dd.date time.livestamp::text').extract()
-        
         #get the epoch format of the date
         epochDates = epochDate(dates_values)
          
