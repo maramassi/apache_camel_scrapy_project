@@ -22,6 +22,13 @@ class ApachecamelspiderSpider(scrapy.Spider):
              date_epoch_list.append(date_time_obj)
            return date_epoch_list
 
+        def isoTimeFormat(date_time_list):
+           date_iso_list=[]
+           for date_time_str in date_time_list:
+             date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M')
+             date_iso_list.append(date_time_obj.isoformat(timespec='microseconds'))
+           return date_iso_list		
+		   
 		#function used to get the epoch date lables    
         def epochDateLabels(dateLabelsList):
            newList=[]
@@ -71,7 +78,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
 		#building the dictionnaries
         descrDict={'description' : descriptionValues}
         commentsDict={'comments' : comments_values}
-        datesDict= dict(zip(dates_labels, dates_values))
+        datesDict= dict(zip(dates_labels, isoTimeFormat(dates_values)))
         datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
         dicDetailsValue = dict(zip(details_lables, valueList))
         dicDetailsValue.update(datesDict)
