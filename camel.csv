@@ -1,2 +1,0 @@
-Type,Status,Priority,Resolution,Affects Version/s,Fix Version/s,Component/s,Labels,Created,Updated,Resolved,Assignee,Reporter,description
-Bug,,,,,Minor,Fixed,,12/14/2016 14:42,12/15/2016 14:26,12/14/2016 15:31,ClausIbsen,Bob Paulin,Assume I have rest path And in the type ClassA contains a reference to ClassB. Within the Swagger Doc the path for ClassA renders as expected: However ClassB gets a string parameter scheme However I'd expect it to be:
