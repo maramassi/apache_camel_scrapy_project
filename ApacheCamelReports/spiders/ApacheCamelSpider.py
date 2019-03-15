@@ -16,26 +16,19 @@ class ApachecamelspiderSpider(scrapy.Spider):
            date_epoch_list=[]
            #loop on the list of dates => convert it to milliseconds format
            for date_time_str in date_time_list:
-             date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M').timestamp()
+             #date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M').timestamp()
+             date_time_obj = dt.strptime(date_time_str, '%Y-%m-%dT%H:%M:%S%z').timestamp()
              date_epoch_list.append(date_time_obj)
            return date_epoch_list
 
-        def isoTimeFormat(date_time_list):
-           date_iso_list=[]
-           #loop on the list of string dates => convert it from string format => convert it to isoformat
-           for date_time_str in date_time_list:
-             date_time_obj = dt.strptime(date_time_str, '%d/%b/%y %H:%M')
-             date_iso_list.append(date_time_obj.isoformat(timespec='microseconds'))
-           return date_iso_list		
-		   
-		#function used to get the epoch date lables. Derived from the date Labels by adding the suffix _Epoch   
+	#function used to get the epoch date lables. Derived from the date Labels by adding the suffix _Epoch   
         def epochDateLabels(dateLabelsList):
            newList=[]
            for label in dateLabelsList:
             newList.append(label + "_Epoch")
            return newList
 
-		#function used to get rid of the spaces, carriage returns, etc.. of the list of strings
+	#function used to get rid of the spaces, carriage returns, etc.. of the list of strings
         def clearStringList(strListToClear):
            newClearedList=[]
            for details in strListToClear:
@@ -43,10 +36,10 @@ class ApachecamelspiderSpider(scrapy.Spider):
             newClearedList.append(newDetail)
            return newClearedList
 		  
-		#Extract the labels of the detail section
+	#Extract the labels of the detail section
         details_lables=clearStringList(response.css('#issuedetails > li > div > strong::text, ul.property-list > li > div > strong::text').extract())
          
-		#TODO: Extract correct the values of the details section
+	#TODO: Extract correct the values of the details section
         details_values=response.css('#issuedetails span.value:not(img)::text, span.value span a::text, span.value span::text, ul.property-list > li > div > div> div > span::text, ul.property-list > li > div > div::text').extract() 
         print(details_values)
         valueList=clearStringList(details_values)
@@ -68,19 +61,19 @@ class ApachecamelspiderSpider(scrapy.Spider):
         #TODO extract comments section         //*[@class="activity-comment"]/div[1]/div[2]/p/text()
         comments_values=response.css('div#comment-15748543.issue-data-block p::text').extract() 
         print(comments_values)
-		#combine all the parsed comments into a single field
+	#combine all the parsed comments into a single field
         comments_values=" ".join(comments_values)
         
-		#extract description section
+	#extract description section
         descriptionValues=response.css('div.user-content-block p::text').extract()
         #combine all the parsed comments into a single field
         descriptionValues=" ".join(descriptionValues)
 
-		#building the dictionnaries
+	#building the dictionnaries
         #combining the dictionnaries into one global one
         descrDict={'description' : descriptionValues} #key : value
         commentsDict={'comments' : comments_values}
-        datesDict= dict(zip(dates_labels, isoTimeFormat(dates_values)))
+        datesDict= dict(zip(dates_labels, dates_values))
         datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
         dicDetailsValue = dict(zip(details_lables, valueList))
         dicDetailsValue.update(datesDict)
