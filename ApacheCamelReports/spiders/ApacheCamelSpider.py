@@ -49,7 +49,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
         #details_values=clearStringList(detailsItems.xpath('//div[@class="wrap"]/span/text()[not(normalize-space(.)="")] | //div[@class="wrap"]/span[@class="value"]/span/text()[not(normalize-space(.)="")]').extract())# | //div[@class="wrap"]/span[@id="resolution-val"]/text() | //div[@class="wrap"]/span[@class="value"]/span/a/text() | //div[@class="wrap"]/span[@class="value"]/span/span/text() | //div[@class="wrap"]/span[@class="value"]/span/text()').extract())
         details_values=clearStringList(response.css('#issuedetails span.value:not(img)::text, span.value span#components-field a::text, span.value span::text, ul.property-list > li > div > div> div > span::text, ul.property-list > li > div > div::text').extract())# , ul.property-list > li > div > div >span ::text').extract())
         
-		while '' in details_values:
+        while '' in details_values:
            details_values.remove('')
         print(details_values)     
 
