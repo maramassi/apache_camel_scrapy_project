@@ -53,8 +53,8 @@ class ApachecamelspiderSpider(scrapy.Spider):
             versionsListStr=", ".join(versionsList)
             details_values.append(versionsListStr)
           else:
-            #todo: check descendant
-            details_values.append(liItem.xpath('span/text()[not(normalize-space(.)="")] | span/*/text()[not(normalize-space(.)="")] | span/span/*/text() | div/*/text()  | div/div/*/text() | div/text()[not(normalize-space(.)="")] | div/div[@id="shorten"]/span/text()[not(normalize-space(.)="")]').extract_first())
+            #todo: try the descendant solution
+            details_values.append(liItem.xpath('span/text()[not(normalize-space(.)="")] | span/*/text()[not(normalize-space(.)="")] | span/span/*/text() | div/*/text()  | div/div/*/text() | div/text()[not(normalize-space(.)="")] | div/div[@class="shorten"]/span/text()[not(normalize-space(.)="")]').extract_first())
             
 		#parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
         peopleLables=response.xpath('//div[@id="peoplemodule"]//ul[@class="item-details"]//dt/text()[not(normalize-space(.)="")]').extract()
@@ -71,19 +71,15 @@ class ApachecamelspiderSpider(scrapy.Spider):
         #combine all the parsed description into a single field
         descriptionValues=" ".join(descriptionValues)
 
-		#TODO extract comments section //*[@class="activity-comment"]/div[1]/div[2]/p/text()
-		#description with code part response.css('.mod-content * p::text, .mod-content * span::text').extract() 
-        comments_values=response.css('div.issue-data-block.focused p:nth-of-type(1)').extract() 
-        comments_values1= response.xpath('//*[@id="comment-15748543"]/div[1]/div[2]/p/text()').getall()
-        print('***********CMT***************')
-        print(comments_values)
+		#Extract comments section 
+        comments_values= response.xpath('//div[contains(@class, "activity-comment")]//div[contains(@class, "action-body")]/p/text()').extract() 
         #combine all the parsed comments into a single field
         comments_values=" ".join(comments_values)
 				
 		#building the dictionnaries
         #combining the dictionnaries into a global one
-        descrDict={'description' : descriptionValues} #key : value
-        commentsDict={'comments' : comments_values}
+        descrDict={'Description' : descriptionValues} #key : value
+        commentsDict={'Comments' : comments_values}
         datesDict= dict(zip(dates_labels, dates_values))
         datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
         dicDetailsValue = dict(zip(details_lables, clearStringList(details_values)))
