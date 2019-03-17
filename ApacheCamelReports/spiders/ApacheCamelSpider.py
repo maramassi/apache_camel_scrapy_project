@@ -35,26 +35,26 @@ class ApachecamelspiderSpider(scrapy.Spider):
             newDetail=details.replace(':', '').replace('\n', '').replace('\r', '').replace(' ','')
             newClearedList.append(newDetail)
            return newClearedList
-		  
-        details_values=[]
-		#details_values=response.xpath('#issuedetails span.value:not(img)::text, span.value span a::text, span.value span::text, ul.property-list > li > div > div> div > span::text, ul.property-list > li > div > div::text').extract() 
-        detailsItems =response.xpath("//ul[@id='issuedetails']/li[starts-with(@class, 'item')]") #extracting all the li-details items
+		 
+        #DETAILS section: extracting all the li-details items		 
+        detailsItems =response.xpath("//ul[@class='property-list']/li[starts-with(@class, 'item')]") 
+        
+		#extracting the labels of the details section
         details_lables=clearStringList(detailsItems.xpath("//div[@class='wrap']/strong/text()").extract())
-        for label in details_lables:
-           if label == "FixVersion/s":
-             details_lables.remove(label)
         
-		#item in detailsItems:
-        #details_values.append(item.xpath('/div[@class="wrap"]/span[@class="value"]/text()[not(normalize-space(.)="")]').extract_first());		
-        #details_values=clearStringList(detailsItems.xpath('//div[@class="wrap"]/span/text()[not(normalize-space(.)="")] | //div[@class="wrap"]/span[@class="value"]/span/text()[not(normalize-space(.)="")]').extract())# | //div[@class="wrap"]/span[@id="resolution-val"]/text() | //div[@class="wrap"]/span[@class="value"]/span/a/text() | //div[@class="wrap"]/span[@class="value"]/span/span/text() | //div[@class="wrap"]/span[@class="value"]/span/text()').extract())
-        details_values=clearStringList(response.css('#issuedetails span.value:not(img)::text, span.value span#components-field a::text, span.value span::text, ul.property-list > li > div > div> div > span::text, ul.property-list > li > div > div::text').extract())# , ul.property-list > li > div > div >span ::text').extract())
+        #this list will contain the extracted values of the details section
+        details_values=[]
         
-        while '' in details_values:
-           details_values.remove('')
-        
-        while ',' in details_values:
-           details_values.remove(',')
-        
+		#looping on the unordered list to get all the liste items
+        for liItem in response.css('ul.property-list > li.item > div.wrap'):
+		  #for the fixVersions field, we need to concatenate the values of the versions
+          if liItem.css('*#fixVersions-field'):
+            versionsList = liItem.xpath('span[@id="fixfor-val"]/span/a/text()').extract()
+            versionsListStr=", ".join(versionsList)
+            details_values.append(versionsListStr)
+          else:
+            details_values.append(liItem.xpath('span/text()[not(normalize-space(.)="")] | span/*/text()[not(normalize-space(.)="")] | span/span/*/text() | div/*/text()  | div/div/*/text() | div/text()[not(normalize-space(.)="")] | div/div[@id="shorten"]/span/text()[not(normalize-space(.)="")]').extract_first())
+		        
 		#parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
         peopleDictNew = {'Assignee' : str(response.css('span#assignee-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
                          'Reporter' : str(response.css('span#reporter-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
@@ -88,7 +88,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
         commentsDict={'comments' : comments_values}
         datesDict= dict(zip(dates_labels, dates_values))
         datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
-        dicDetailsValue = dict(zip(details_lables, details_values))
+        dicDetailsValue = dict(zip(details_lables, clearStringList(details_values)))
         dicDetailsValue.update(datesDict)
         dicDetailsValue.update(datesEpochDict)
         dicDetailsValue.update(peopleDictNew)
