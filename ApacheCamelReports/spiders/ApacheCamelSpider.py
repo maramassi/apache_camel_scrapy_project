@@ -51,12 +51,10 @@ class ApachecamelspiderSpider(scrapy.Spider):
         
         while '' in details_values:
            details_values.remove('')
-        print(details_values)     
-
+        
         while ',' in details_values:
            details_values.remove(',')
-        print(details_values)     
-
+        
 		#parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
         peopleDictNew = {'Assignee' : str(response.css('span#assignee-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
                          'Reporter' : str(response.css('span#reporter-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
@@ -69,20 +67,21 @@ class ApachecamelspiderSpider(scrapy.Spider):
         dates_values=response.css('dd.date time.livestamp::attr(datetime)').extract()
 		#get the epoch format of the date
         epochDates = epochDate(dates_values)
-         
-        #TODO extract comments section //*[@class="activity-comment"]/div[1]/div[2]/p/text()
-        comments_values=response.css('div#comment-15748543.issue-data-block p::text').extract()
-        cmt_val= response.css('div.activity-comment div.action-details ::text').extract()		
-        print('***********CMT***************')
-        print(cmt_val)
-        #combine all the parsed comments into a single field
-        comments_values=" ".join(comments_values)
-        
+                 
         #extract description section
-        descriptionValues=response.css('div.user-content-block p::text').extract()
-        #combine all the parsed comments into a single field
+        descriptionValues=response.css('#description-val div.user-content-block p::text, #description-val div.user-content-block .codeContent *::text').extract()
+        #combine all the parsed description into a single field
         descriptionValues=" ".join(descriptionValues)
 
+		#TODO extract comments section //*[@class="activity-comment"]/div[1]/div[2]/p/text()
+		#description with code part response.css('.mod-content * p::text, .mod-content * span::text').extract() 
+        comments_values=response.css('div.issue-data-block.focused p:nth-of-type(1)').extract() 
+        comments_values1= response.xpath('//*[@id="comment-15748543"]/div[1]/div[2]/p/text()').getall()
+        print('***********CMT***************')
+        print(comments_values)
+        #combine all the parsed comments into a single field
+        comments_values=" ".join(comments_values)
+				
 		#building the dictionnaries
         #combining the dictionnaries into a global one
         descrDict={'description' : descriptionValues} #key : value
