@@ -5,7 +5,7 @@ The crawled URL is
 https://issues.apache.org/jira/browse/CAMEL-10597
 
 The used tool is Scrapy 1.6
-#for Scrapy installation check the below URL
+For Scrapy installation on Windows 10 check the below URL
 https://www.scrapehero.com/how-to-install-python3-in-windows-10/
 
 Through the cmd, run the following command to run the spider, crawl the requested page and insert the parsed data in a csv file
