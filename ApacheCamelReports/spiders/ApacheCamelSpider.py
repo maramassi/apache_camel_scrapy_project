@@ -53,6 +53,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
             versionsListStr=", ".join(versionsList)
             details_values.append(versionsListStr)
           else:
+		#todo: check descendant
             details_values.append(liItem.xpath('span/text()[not(normalize-space(.)="")] | span/*/text()[not(normalize-space(.)="")] | span/span/*/text() | div/*/text()  | div/div/*/text() | div/text()[not(normalize-space(.)="")] | div/div[@id="shorten"]/span/text()[not(normalize-space(.)="")]').extract_first())
 		        
 		#parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
