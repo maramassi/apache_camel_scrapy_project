@@ -32,7 +32,7 @@ class ApachecamelspiderSpider(scrapy.Spider):
         def clearStringList(strListToClear):
            newClearedList=[]
            for details in strListToClear:
-            newDetail=details.replace(':', '').replace('\n', '').replace('\r', '').replace(' ','')
+            newDetail=details.replace(':', '').replace('\n', '').replace('\r', '').strip()
             newClearedList.append(newDetail)
            return newClearedList
 		 
@@ -53,15 +53,12 @@ class ApachecamelspiderSpider(scrapy.Spider):
             versionsListStr=", ".join(versionsList)
             details_values.append(versionsListStr)
           else:
-		#todo: check descendant
+            #todo: check descendant
             details_values.append(liItem.xpath('span/text()[not(normalize-space(.)="")] | span/*/text()[not(normalize-space(.)="")] | span/span/*/text() | div/*/text()  | div/div/*/text() | div/text()[not(normalize-space(.)="")] | div/div[@id="shorten"]/span/text()[not(normalize-space(.)="")]').extract_first())
-		        
+            
 		#parsing the people section fields. The first span is always an image for both the Assignee and the Reporter => Select the second element
-        peopleDictNew = {'Assignee' : str(response.css('span#assignee-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
-                         'Reporter' : str(response.css('span#reporter-val.view-issue-field > span.user-hover::text').extract()[1]).replace('\n', '').strip(),
-                         'Votes'    : response.css('#vote-data::text').extract(),
-                         'Watchers'	: response.css('#watcher-data::text').extract()
-                        }						 
+        peopleLables=response.xpath('//div[@id="peoplemodule"]//ul[@class="item-details"]//dt/text()[not(normalize-space(.)="")]').extract()
+        peopleValueList=clearStringList(response.xpath('//div[@id="peoplemodule"]//ul[@class="item-details"]//span[contains(@class, "user-hover") or contains(@class, "aui-badge")]/text()[not(normalize-space(.)="")]').extract())
         
         #dates section. Get the list of all the fields in the date section as well as their values
         dates_labels=clearStringList(response.css('div#datesmodule.module > div.mod-content ul li dl.dates dt::text').extract())
@@ -90,9 +87,10 @@ class ApachecamelspiderSpider(scrapy.Spider):
         datesDict= dict(zip(dates_labels, dates_values))
         datesEpochDict=dict(zip(epochDateLabels(dates_labels),epochDates))
         dicDetailsValue = dict(zip(details_lables, clearStringList(details_values)))
+        peopleDict = dict(zip(peopleLables, peopleValueList))
         dicDetailsValue.update(datesDict)
         dicDetailsValue.update(datesEpochDict)
-        dicDetailsValue.update(peopleDictNew)
+        dicDetailsValue.update(peopleDict)
         dicDetailsValue.update(commentsDict)
         dicDetailsValue.update(descrDict)
         
